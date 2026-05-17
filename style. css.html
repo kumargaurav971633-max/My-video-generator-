@@ -1,0 +1,191 @@
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-center text-sm mt-2">No video generated yet</p>
+                <p className="text-xs opacity-75">Enter a description to create your video</p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    const PromptInput = ({ prompt, onPromptChange, onGenerate }) => {
+      const [charCount, setCharCount] = useState(0);
+
+      const handleInput = (e) => {
+        const value = e.target.value;
+        onPromptChange(value);
+        setCharCount(value.length);
+      };
+
+      return (
+        <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-xl rounded-3xl p-8 border border-gray-700/50 shadow-2xl">
+          <h3 className="text-lg font-semibold mb-6 flex items-center">
+            <span className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>
+            Video Description
+          </h3>
+          <div className="space-y-4">
+            <textarea
+              value={prompt}
+              onChange={handleInput}
+              placeholder="Describe the video you want to create... e.g., 'A majestic dragon flying over a mystical mountain range at sunset, cinematic lighting, 4K quality'"
+              className="w-full h-32 p-6 bg-gray-900/50 border border-gray-600/50 rounded-2xl focus:ring-2 focus:ring-purple-500/50 focus:border-transparent resize-vertical text-lg placeholder-gray-400 transition-all duration-200"
+              maxLength={500}
+            />
+            <div className="flex justify-between items-center text-sm text-gray-400">
+              <div className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2">
+                  <input type="checkbox" className="w-4 h-4 text-purple-500 rounded focus:ring-purple-500" />
+                  <span>HD Quality</span>
+                </label>
+              </div>
+              <span>{charCount}/500</span>
+            </div>
+            <button
+              onClick={onGenerate}
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-4 px-8 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center space-x-3 text-lg"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Generate Video</span>
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    const GenerationControls = ({ isGenerating, onCancel }) => (
+      <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 backdrop-blur-xl rounded-3xl p-6 border border-orange-500/30 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-3 h-3 bg-orange-400 rounded-full animate-pulse"></div>
+            <h4 className="font-semibold text-orange-300">Generating Video</h4>
+          </div>
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 bg-red-500/80 hover:bg-red-600 text-white text-sm font-medium rounded-xl transition-all duration-200 hover:scale-105"
+          >
+            Cancel
+          </button>
+        </div>
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center space-x-2 text-sm text-orange-200">
+            <div className="w-2 h-2 bg-orange-400 rounded-full animate-ping"></div>
+            <span>Processing AI model...</span>
+          </div>
+          <div className="w-full bg-gray-700/50 rounded-full h-2">
+            <div className="bg-gradient-to-r from-orange-400 to-red-400 h-2 rounded-full animate-pulse" style={{width: '60%'}}></div>
+          </div>
+        </div>
+      </div>
+    );
+
+    const MainApp = () => {
+      const [prompt, setPrompt] = useState('');
+      const [isGenerating, setIsGenerating] = useState(false);
+      const [videoUrl, setVideoUrl] = useState('');
+      const [sidebarOpen, setSidebarOpen] = useState(false);
+      const [progress, setProgress] = useState(0);
+
+      const handleGenerate = async () => {
+        if (!prompt.trim()) return;
+
+        setIsGenerating(true);
+        setVideoUrl('');
+        setProgress(0);
+
+        // Simulate generation process
+        const steps = [
+          { percent: 25, duration: 1000 },
+          { percent: 50, duration: 1500 },
+          { percent: 75, duration: 2000 },
+          { percent: 100, duration: 1000 }
+        ];
+
+        for (let i = 0; i < steps.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, steps[i].duration));
+          setProgress(steps[i].percent);
+        }
+
+        // Simulate video generation result
+        setTimeout(() => {
+          setVideoUrl('https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4');
+          setIsGenerating(false);
+        }, 500);
+      };
+
+      const handleCancel = () => {
+        setIsGenerating(false);
+        setProgress(0);
+      };
+
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-black">
+          {/* Mobile menu overlay */}
+          {sidebarOpen && (
+            <div 
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+          
+          <Sidebar />
+          
+          <main className="lg:ml-64 p-6 lg:p-8 max-w-6xl mx-auto">
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Left column - Controls */}
+              <div className="lg:w-1/2 space-y-8">
+                <PromptInput
+                  prompt={prompt}
+                  onPromptChange={setPrompt}
+                  onGenerate={handleGenerate}
+                />
+                
+                {isGenerating && (
+                  <GenerationControls 
+                    isGenerating={isGenerating}
+                    onCancel={handleCancel}
+                  />
+                )}
+              </div>
+              
+              {/* Right column - Preview */}
+              <div className="lg:w-1/2">
+                <VideoPreview 
+                  isGenerating={isGenerating}
+                  videoUrl={videoUrl}
+                />
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="mt-16 pt-12 border-t border-gray-800/50 text-center text-gray-500 text-sm">
+              <p>Powered by AI VideoGen • Demo Mode</p>
+            </div>
+          </main>
+
+          {/* Mobile menu button */}
+          <button
+            className="fixed top-6 left-6 z-50 lg:hidden p-3 bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 shadow-2xl hover:bg-white/10 transition-all duration-200"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      );
+    };
+
+    const App = () => (
+      <div className="h-screen overflow-hidden">
+        <MainApp />
+      </div>
+    );
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
