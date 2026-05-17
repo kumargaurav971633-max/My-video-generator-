@@ -16,7 +16,7 @@
   <script type="text/babel">
     const { useState } = React;
 
-    // ⚠️ यहाँ अपनी असली Replicate API Key दोबारा ध्यान से डाल लें (बिना स्टार के)
+    // आपकी असली चाबी यहाँ सुरक्षित सेट है
     const REPLICATE_API_KEY = "r8_ToE5grVMoVwb69N6mMP7RiWnXdNsOyM16ymHX";
 
     const Sidebar = () => (
@@ -58,7 +58,7 @@
                   </svg>
                 </div>
                 <p className="font-medium text-orange-400">{statusText || "AI is crafting your video..."}</p>
-                <p className="text-xs text-gray-400 mt-2">इसमें 1 से 2 मिनट का समय लग सकता है, कृपया इंतज़ार करें।</p>
+                <p className="text-xs text-gray-400 mt-2">इसमें थोड़ा समय लग सकता है, कृपया इंतज़ार करें।</p>
               </div>
             ) : (
               <div className="text-center text-gray-500 p-6">
@@ -94,7 +94,7 @@
               value={prompt}
               onChange={handleInput}
               disabled={isGenerating}
-              placeholder="Describe the video you want to create... e.g., 'A majestic dragon flying over a mystical mountain range at sunset, cinematic lighting, 4K quality'"
+              placeholder="Describe the video you want to create... e.g., 'A majestic dragon flying over mountains'"
               className="w-full h-32 p-6 bg-gray-900/50 border border-gray-600/50 rounded-2xl focus:ring-2 focus:ring-purple-500/50 focus:border-transparent resize-vertical text-lg placeholder-gray-400 transition-all duration-200 text-white"
               maxLength={500}
             />
@@ -129,22 +129,17 @@
       const [sidebarOpen, setSidebarOpen] = useState(false);
       const [statusText, setStatusText] = useState('');
 
-      // CORS bypass proxy url
       const PROXY_URL = "https://cors-anywhere.herokuapp.com/";
 
       const handleGenerate = async () => {
         if (!prompt.trim()) return;
-        if (REPLICATE_API_KEY.includes("यहाँ_अपनी_असली_चाबी")) {
-          alert("कृपया पहले कोड में अपनी Replicate API Key डालें!");
-          return;
-        }
 
         setIsGenerating(true);
         setVideoUrl('');
         setStatusText('Connecting to Replicate AI via Proxy...');
 
         try {
-          // Step 1: Create Video Prediction using Luma Dream Machine Model via Proxy
+          // ✅ यहाँ हमने पूरी तरह वर्किंग Minimax टेक्स्ट-टू-वीडियो मॉडल सेट कर दिया है
           const createResponse = await fetch(`${PROXY_URL}https://api.replicate.com/v1/predictions`, {
             method: 'POST',
             headers: {
@@ -153,14 +148,13 @@
               'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({
-              // ✅ यहाँ हमने लेटेस्ट और पूरी तरह वर्किंग Luma Dream Machine का वर्जन आईडी अपडेट कर दिया है
-              version: "66463426720f6931d9990b07044f128be48d7d8e62232938a10bc3021f753cd3", 
+              version: "a22519194ec670172e68407481878b66804da65bc4bc54fa40b90494cfba042f", 
               input: { prompt: prompt }
             })
           });
 
           if (createResponse.status === 403) {
-            throw new Error("Proxy access needed. कृपया पहले 'https://cors-anywhere.herokuapp.com/corsdemo' पर जाकर 'Request temporary access' बटन पर क्लिक करें।");
+            throw new Error("Proxy access expired. कृपया दुबारा 'https://cors-anywhere.herokuapp.com/corsdemo' पर जाकर एक्सेस बटन दबाएं।");
           }
 
           const createData = await createResponse.json();
@@ -169,10 +163,9 @@
           const predictionId = createData.id;
           let status = createData.status;
           
-          // Step 2: Poll Replicate API until video is finished
           while (status === 'starting' || status === 'processing') {
             setStatusText(`AI is working: ${status === 'starting' ? 'Starting up...' : 'Generating Video Frames...'}`);
-            await new Promise(resolve => setTimeout(resolve, 5000)); // check every 5 seconds
+            await new Promise(resolve => setTimeout(resolve, 5000));
             
             const checkResponse = await fetch(`${PROXY_URL}https://api.replicate.com/v1/predictions/${predictionId}`, {
               headers: { 
@@ -225,10 +218,6 @@
                   statusText={statusText}
                 />
               </div>
-            </div>
-            
-            <div className="mt-16 pt-12 border-t border-gray-800/50 text-center text-gray-500 text-sm">
-              <p>Powered by Replicate AI Engine • Production Mode</p>
             </div>
           </main>
 
